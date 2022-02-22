@@ -60,15 +60,20 @@ contract PondToken {
 }
 
 contract Farming {
+
   string public name = "Farm";
   uint public apy;
   address public owner;
   PondToken public pondToken;
+
   // address public rewardAddress;
   address[] public stakers;
   mapping(address => uint) public stakingBalance;
   mapping(address => uint) public stakingTime;
   mapping(address => bool) public hasStaked;
+
+  //Events
+  event UserStakedToken(address indexed staker, uint stakedAmount);
 
   constructor(PondToken _pondToken) {
     pondToken = _pondToken;
@@ -108,6 +113,7 @@ contract Farming {
 
     //Update a users' staking flag
     hasStaked[msg.sender] = true;
+    //emit UserStakedToken(msg.sender, _amount);
   }
 
   //3. Issuing Tokens
@@ -149,8 +155,8 @@ contract Farming {
   // }
 
   //6. owner set apy
-  function setAPY(uint _apy) public {
+  /*function setAPY(uint _apy) public {
     require(msg.sender == owner, "not owner");
     apy = _apy;
-  }
+  }*/
 }

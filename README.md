@@ -39,3 +39,6 @@ Then, copy the deployment address and paste it in to replace `DEPLOYED_CONTRACT_
 ```shell
 npx hardhat verify --network ropsten DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
 ```
+## Upwork Project Requirements
+
+1. Instead of APY, I want an external function that can be called by the owner or another specific address that can add or subtract the tokens the users ‘staked’ amount should be.  It will no longer be a staking contract.  Basically, in this contract users will be able to deposit a specific token.  Then, there will be an external function that can be called by the owner or another specific address that can add or subtract the tokens that the user is allowed to withdraw
