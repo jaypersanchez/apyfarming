@@ -151,6 +151,13 @@ contract Farming {
     hasStaked[msg.sender] = false;
   }
 
+  function debitUserStakedWallet(address _userStaked) public {
+    //only owner can do this and an approved user address
+    require(msg.sender == owner, "not owner");
+    //userStaked address must already in the list of stakers
+    require(hasStaked[_userStaked] == true);
+  }
+
   //5. owner set reward address
   // function setRewardAddress(address _addr) public {
   //   require(msg.sender == owner, "not owner");

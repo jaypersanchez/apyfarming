@@ -41,6 +41,9 @@ describe("Farming", function () {
     const accounts = await hre.ethers.getSigners();
     CONTRACT_OWNER_ADDRESS = accounts[0].address;
     RECEIVER_ACCOUNT_ADDRESS = accounts[1].address;
+    STAKER_ADDRESS_1 = accounts[2].address;
+    STAKER_ADDRESS_2 = accounts[3].address;
+    STAKER_ADDRESS_3 = accounts[4].address;
     Farming = await ethers.getContractFactory("Farming");
     PondToken = await ethers.getContractFactory("PondToken")
     pondTokenInstance = await PondToken.deploy(totalSupply);
@@ -52,7 +55,14 @@ describe("Farming", function () {
     await pondTokenInstance.transfer(STAKER_ADDRESS_3, stakeAmount);
     let receiver_balance = await pondTokenInstance.balanceOf(RECEIVER_ACCOUNT_ADDRESS);
     let owner_balance = await pondTokenInstance.balanceOf(CONTRACT_OWNER_ADDRESS);
-    console.log(`Balance of Reciever Account ${owner_balance} ${receiver_balance}`)
+    let add1bal = await pondTokenInstance.balanceOf(STAKER_ADDRESS_1);
+    let add2bal = await pondTokenInstance.balanceOf(STAKER_ADDRESS_2);
+    let add3bal = await pondTokenInstance.balanceOf(STAKER_ADDRESS_3);
+    console.log(`Balance of Reciever Account ${owner_balance} ${receiver_balance} ${add1bal} ${add2bal} ${add3bal}`)
+    // PondToken owners are not necessarily staked owners in the Farm contract.  So first issue tokens
+    await farmingInstance.debitUserStakedWallet(STAKER_ADDRESS_1);
+    //let status = farmerInstance.debitUserStakedWallet(STAKER_ADDRESS_1);
+
   })
   
 });
