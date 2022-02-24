@@ -21,11 +21,15 @@ contract PondToken {
       balances[msg.sender] = totalSupply_;
     }
 
+    function getMsgSender() public view returns(address) {
+        return msg.sender;
+    }
+
     function totalSupply() public view returns (uint256) {
       return totalSupply_;
     }
 
-    function balanceOf(address tokenOwner) public view returns (uint) {
+    function balanceOf(address tokenOwner) public view returns (uint256) {
         return balances[tokenOwner];
     }
 
