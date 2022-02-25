@@ -1,5 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { BigNumber } = require('ethers');
 require("@nomiclabs/hardhat-waffle");
 require('dotenv').config();
 
@@ -58,9 +59,25 @@ describe("Farming", function () {
     let add1bal = await pondTokenInstance.balanceOf(STAKER_ADDRESS_1);
     let add2bal = await pondTokenInstance.balanceOf(STAKER_ADDRESS_2);
     let add3bal = await pondTokenInstance.balanceOf(STAKER_ADDRESS_3);
-    console.log(`Balance of Reciever Account ${owner_balance} ${receiver_balance} ${add1bal} ${add2bal} ${add3bal}`)
+    console.log(`Balance of Reciever Accounts ${owner_balance} ${receiver_balance} ${add1bal} ${add2bal} ${add3bal}`)
+    try {
+       let result = await pondTokenInstance.transfer(STAKER_ADDRESS_1, stakeAmount);
+       console.log(`Transfer Result ${(result).tostring}`);
+    }
+    catch(error) {
+        console.log(`Transfer Failed ${error}`);
+    }
+    /*try {
+        let result = await farmingInstance.getAirdrop(STAKER_ADDRESS_1, stakeAmount);
+        console.log(`Airdrop :: ${result}`)
+    }
+    catch(error) {
+      console.log(`Airdrop Failed ${error}`)
+    }*/
+    
+    //await farmingInstance.stakeTokens(5);
     // PondToken owners are not necessarily staked owners in the Farm contract.  So first issue tokens
-    await farmingInstance.debitUserStakedWallet(STAKER_ADDRESS_1);
+    //await farmingInstance.debitUserStakedWallet(STAKER_ADDRESS_1);
     //let status = farmerInstance.debitUserStakedWallet(STAKER_ADDRESS_1);
 
   })
