@@ -12,6 +12,7 @@ describe("Farming", function () {
   let STAKER_ADDRESS_1 = null;
   let STAKER_ADDRESS_2 = null;
   let STAKER_ADDRESS_3 = null;
+  const pondTokenToFarming = "100000";
   const totalSupply = "1000000000";
   const stakeAmount = "10000";
   let Farming = null;
@@ -49,8 +50,20 @@ describe("Farming", function () {
     PondToken = await ethers.getContractFactory("PondToken")
     pondTokenInstance = await PondToken.deploy(totalSupply);
     farmingInstance = await Farming.deploy(pondTokenInstance.address);
+    //PondToken need to transfer to Farming contract to have starting balance.
+    await pondTokenInstance.transfer(farmingInstance.address, pondTokenToFarming);
+    await pondTokenInstance.transfer(STAKER_ADDRESS_1, stakeAmount);
+    let staker1PondTokenBalance = await pondTokenInstance.balanceOf(STAKER_ADDRESS_1);
+    let farmPondTokenBalance = await pondTokenInstance.balanceOf(farmingInstance.address);
+    console.log(`PondToken Balance farmingInstance :: stakeradd1 ${farmPondTokenBalance}::${staker1PondTokenBalance}`);
+
+   let a = await farmingInstance.attach(STAKER_ADDRESS_1);
+   await a.stakeTokens(200);
+   let _staker1PondTokenBalance = await pondTokenInstance.balanceOf(STAKER_ADDRESS_1);
+   console.log(`PondToken Balance stakeradd1 ${_staker1PondTokenBalance}`);
+
     //issue, air drop Pond token to a test receiver address
-    await pondTokenInstance.transfer(RECEIVER_ACCOUNT_ADDRESS, stakeAmount);
+    /*await pondTokenInstance.transfer(RECEIVER_ACCOUNT_ADDRESS, stakeAmount);
     await pondTokenInstance.transfer(STAKER_ADDRESS_1, stakeAmount);
     await pondTokenInstance.transfer(STAKER_ADDRESS_2, stakeAmount);
     await pondTokenInstance.transfer(STAKER_ADDRESS_3, stakeAmount);
@@ -58,22 +71,15 @@ describe("Farming", function () {
     let owner_balance = await pondTokenInstance.balanceOf(CONTRACT_OWNER_ADDRESS);
     let add1bal = await pondTokenInstance.balanceOf(STAKER_ADDRESS_1);
     let add2bal = await pondTokenInstance.balanceOf(STAKER_ADDRESS_2);
-    let add3bal = await pondTokenInstance.balanceOf(STAKER_ADDRESS_3);
-    console.log(`Balance of Reciever Accounts ${owner_balance} ${receiver_balance} ${add1bal} ${add2bal} ${add3bal}`)
-    try {
-       let result = await pondTokenInstance.transfer(STAKER_ADDRESS_1, stakeAmount);
-       console.log(`Transfer Result ${(result).tostring}`);
-    }
-    catch(error) {
-        console.log(`Transfer Failed ${error}`);
-    }
-    /*try {
-        let result = await farmingInstance.getAirdrop(STAKER_ADDRESS_1, stakeAmount);
-        console.log(`Airdrop :: ${result}`)
-    }
-    catch(error) {
-      console.log(`Airdrop Failed ${error}`)
-    }*/
+    let add3bal = await pondTokenInstance.balanceOf(STAKER_ADDRESS_3);*/
+    //console.log(`Balance of Reciever Accounts ${owner_balance} ${receiver_balance} ${add1bal} ${add2bal} ${add3bal}`)
+    
+    /*let result = await farmingInstance.getAirdrop(STAKER_ADDRESS_1, stakeAmount);
+    const {0: _isapprove, 1: _msg} = result;
+    console.log(`Airdrop ${_isapprove} ${_msg}`)
+    let stakerBalance = await pondTokenInstance.balanceOf(STAKER_ADDRESS_1);
+    console.log(`stakerBalance ${stakerBalance}`)*/
+   
     
     //await farmingInstance.stakeTokens(5);
     // PondToken owners are not necessarily staked owners in the Farm contract.  So first issue tokens

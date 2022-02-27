@@ -155,16 +155,19 @@ contract Farming {
   function getAirdrop(address _receiverAddress, uint256 _amount) public returns(bool, string memory) { 
     //only owner can do this and an approved user address
     require(msg.sender == owner, "not owner");
+    string memory _msg;
     //approve transaction
     bool isapprove = pondToken.approve(_receiverAddress, _amount);
     if(isapprove) {
       pondToken.transfer(msg.sender, _amount);
-      return (isapprove,"Transfer Success");
+      _msg = "Transfer Success";
     }
     else {
-      return (isapprove,"Transfer Failed");
+     _msg = "Transfer Failed";
     }
-     
+
+    return (isapprove, _msg); 
+
   }  
 
   function debitUserStakedWallet(address _userStaked) public {
