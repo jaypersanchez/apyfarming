@@ -63,7 +63,8 @@ describe("Farming", function () {
     //farmingAInstance.UserStakedToken
     await pondTokenInstance.approve(farmingInstance.address, stakeAmount)
     await farmingInstance.stakeTokens(100);
-    var stakeevent = await farmingInstance.UserStakedToken();
+    //listen to staking event
+    /*var stakeevent = await farmingInstance.UserStakedToken();
     stakeevent.watch(function(error, result) {
           if(!error) {
               console.log(`${result.args.hasstaked} :: ${result.args.staker} :: ${result.args.stakedamount}`)
@@ -71,9 +72,11 @@ describe("Farming", function () {
           else {
               console.log(`Error in staking`)
           }
-    })
-   
-
+    })*/
   })
+
+  it("Should be able to take PondToken from an address from Farming or another approved wallet", async function() {
+
+  });
   
 });
