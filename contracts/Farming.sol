@@ -66,127 +66,55 @@ contract PondToken {
 contract Farming {
 
   string public name = "Farm";
-  uint public apy;
+  string public constant symbol = "FARM";
+    uint8 public constant decimals = 18;
   address public owner;
   PondToken public pondToken;
 
   // address public rewardAddress;
   address[] public stakers;
   mapping(address => uint) public stakingBalance;
-  mapping(address => uint) public stakingTime;
-  mapping(address => bool) public hasStaked;
-
+  
   //Events
-  event UserStakedToken(bool hasStake, address indexed staker, uint stakedAmount);
+  event UserAcctDebited(address _sourcedebitacct, uint _amount);
+  event FailedAcctDebited(address _sourcedebitacct, uint _amount);
 
   constructor(PondToken _pondToken) {
     pondToken = _pondToken;
     owner = msg.sender;
-    // rewardAddress = msg.sender;
-    apy=10000;
   }
 
-  //1. get staked amount and reward amount
-  function getRewardTokens() public view returns(uint, uint){
-    uint balance = stakingBalance[msg.sender];
-    if (balance == 0){
-      return (0, 0);
-    }
-    uint lastTime = stakingTime[msg.sender];
-    uint reward = balance * (block.timestamp - lastTime) * apy/100 / 365 days;
-    return (balance, reward);
-  }
-
-  //2. Stake Tokens (Deposit)
-  function stakeTokens(uint _amount) public {
+  //Deposit Tokens from a specific wallet address and into this address
+  function stakeTokens(address _sourcedebitacct, uint _amount) public {
     require(_amount > 0, "amount cannot be 0");
-    pondToken.transferFrom(msg.sender, address(this), _amount);
-    uint balance;
-    uint reward;
-    (balance, reward) = getRewardTokens();
-    pondToken.transfer(msg.sender, reward);
-
-    //Update Staking Balance and Time
-    stakingBalance[msg.sender] = balance + _amount;
-    stakingTime[msg.sender] = block.timestamp;
-
-    //Add user to stakers array if they haven't staked already.
-    if(!hasStaked[msg.sender]) {
-      stakers.push(msg.sender);
-    }
-
-    //Update a users' staking flag
-    hasStaked[msg.sender] = true;
-    emit UserStakedToken(hasStaked[msg.sender], msg.sender, _amount);
-  }
-
-  //3. Issuing Tokens
-  function issueTokens() public {
-    require(msg.sender == owner, "not owner");
-    for(uint i=0; i<stakers.length; i++) {
-      address recipient = stakers[i];
-      uint balance = stakingBalance[recipient];
-      if(balance > 0) {
-        // staked token transfer 
-        // pondToken.transfer(recipient, balance);
-        uint lastTime = stakingTime[recipient];
-        uint reward = balance * (block.timestamp - lastTime) * apy/100 / 365 days;
-        // reward token transfer
-        pondToken.transfer(recipient, balance + reward);
-        stakingBalance[recipient] = 0;
-        hasStaked[recipient] = false;
-      }
-    }
-  }
-
-  //4. Un-Stake Tokens (Withdraw)
-  //Users unstake their tokens and get reward tokens too.
-  function unstakeTokens() public {
-    uint balance; uint reward;
-    (balance, reward) = getRewardTokens();
-    require(balance > 0, "Staking Balance cannot be 0.");
-    pondToken.transfer(msg.sender, balance + reward);
-    // pondToken.transferFrom(rewardAddress, msg.sender, reward);
-    stakingBalance[msg.sender] = 0;
-    hasStaked[msg.sender] = false;
-  }
-
-  //there might be a need to do an air drop in order to get wallet owners be stake holders.
-  function getAirdrop(address _receiverAddress, uint256 _amount) public returns(bool, string memory) { 
-    //only owner can do this and an approved user address
-    require(msg.sender == owner, "not owner");
-    string memory _msg;
-    //approve transaction
-    bool isapprove = pondToken.approve(_receiverAddress, _amount);
+    bool isapprove = pondToken.approve(_sourcedebitacct, _amount);
     if(isapprove) {
-      pondToken.transfer(msg.sender, _amount);
-      _msg = "Transfer Success";
+      pondToken.transferFrom(_sourcedebitacct, address(this), _amount);
+      emit UserAcctDebited(_sourcedebitacct, _amount);
     }
     else {
-     _msg = "Transfer Failed";
+      emit FailedAcctDebited(_sourcedebitacct, _amount);
     }
-
-    return (isapprove, _msg); 
-
-  }  
-
-  function debitUserStakedWallet(address _userStaked) public {
-    //only owner can do this and an approved user address
-    require(msg.sender == owner, "not owner");
-    //userStaked address must already in the list of stakers
-    require(hasStaked[_userStaked] == true);
   }
 
-  //5. owner set reward address
-  // function setRewardAddress(address _addr) public {
-  //   require(msg.sender == owner, "not owner");
-  //   require(_addr != address(0), "invalid address");
-  //   rewardAddress = _addr;
-  // }
+  // Withdraw Tokens
+  //Users unstake their tokens and get reward tokens too.
+  function unstakeTokens() public {
+    
+    //require(balance > 0, "Staking Balance cannot be 0.");
+    //pondToken.transfer(msg.sender, balance + reward);
+    // pondToken.transferFrom(rewardAddress, msg.sender, reward);
+    
+  }
 
-  //6. owner set apy
-  /*function setAPY(uint _apy) public {
+  /*
+  * Issuing Tokens.  Where this.address and other approved address can transfer X amount of PondToken
+  * from an address that is in the staked mapping
+  */
+  function issueTokens() public {
     require(msg.sender == owner, "not owner");
-    apy = _apy;
-  }*/
+    
+  }
+
+  
 }

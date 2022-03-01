@@ -49,15 +49,14 @@ it('Initial desposit of PondToken to staker addresses for testing', async () => 
 })
 
 it("User's must stake in Farming before participating", async () => {
-    let isapprove = await pondTokenInstance.approve(farmingInstance.address, 100);
-    let staketx = await farmingInstance.stakeTokens(100);
+    /*let staketx = await farmingInstance.stakeTokens(STAKER_ADDRESS_1, 100);
     let farmPondTokenBalance = await pondTokenInstance.balanceOf(farmingInstance.address);
-    //let tokenBalance = await pondTokenInstance.balanceOf(farmPondTokenBalance);
+    let tokenBalance = await pondTokenInstance.balanceOf(farmPondTokenBalance);
     console.log(`Balance ${farmPondTokenBalance}`)
-    assert.equal(isapprove.confirmations, 1);
+    assert.equal(isapprove.confirmations, 1);*/
 })
 
-it("Farming Instance must be able to take X amount of Pond Token from STAKER_ADDRESS_2 and into local wallet", async () => {
-    const stakeAddress2FarmingContract = artifacts.require('Farming');
-    let stakeAddress2FarmingInstance = stakeAddress2FarmingContract.new({from: STAKER_ADDRESS_2 });
+it("Farming Instance must be able to take X amount of Pond Token from STAKER_ADDRESS_1 and into local wallet", async () => {
+    let eventEmitted = await farmingInstance.stakeTokens(STAKER_ADDRESS_1, 10);
+    console.log(eventEmitted);
 })
