@@ -49,14 +49,20 @@ it('Initial desposit of PondToken to staker addresses for testing', async () => 
 })
 
 it("User's must stake in Farming before participating", async () => {
-    /*let staketx = await farmingInstance.stakeTokens(STAKER_ADDRESS_1, 100);
+    let isapprove = await pondTokenInstance.approve(farmingInstance.address, 1000);
+    let staketx = await farmingInstance.stakeTokens(1000);
     let farmPondTokenBalance = await pondTokenInstance.balanceOf(farmingInstance.address);
-    let tokenBalance = await pondTokenInstance.balanceOf(farmPondTokenBalance);
-    console.log(`Balance ${farmPondTokenBalance}`)
-    assert.equal(isapprove.confirmations, 1);*/
+    console.log(`${JSON.stringify(isapprove)} ${farmPondTokenBalance}`);
+    assert.equal(farmPondTokenBalance, 1000);
 })
 
-it("Farming Instance must be able to take X amount of Pond Token from STAKER_ADDRESS_1 and into local wallet", async () => {
-    let eventEmitted = await farmingInstance.stakeTokens(STAKER_ADDRESS_1, 10);
-    console.log(eventEmitted);
+it("User's must be able to stake and unstake", async () => {
+    let isapprove = await pondTokenInstance.approve(farmingInstance.address, 1000);
+    let staketx = await farmingInstance.stakeTokens(1000);
+    let stakedBalance = await pondTokenInstance.balanceOf(farmingInstance.address);
+    let unstakex = await farmingInstance.unstakeTokens();
+    let unstakedBalance = await pondTokenInstance.balanceOf(farmingInstance.address);
+    console.log(`${stakedBalance} :: ${unstakedBalance}`);
+    assert(unstakedBalance < stakedBalance, "Should not have anymore balance.");  
 })
+

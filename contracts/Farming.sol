@@ -21,15 +21,11 @@ contract PondToken {
       balances[msg.sender] = totalSupply_;
     }
 
-    function getMsgSender() public view returns(address) {
-        return msg.sender;
-    }
-
     function totalSupply() public view returns (uint256) {
       return totalSupply_;
     }
 
-    function balanceOf(address tokenOwner) public view returns (uint256) {
+    function balanceOf(address tokenOwner) public view returns (uint) {
         return balances[tokenOwner];
     }
 
@@ -64,57 +60,82 @@ contract PondToken {
 }
 
 contract Farming {
-
   string public name = "Farm";
-  string public constant symbol = "FARM";
-    uint8 public constant decimals = 18;
+  uint public apy;
   address public owner;
   PondToken public pondToken;
-
   // address public rewardAddress;
   address[] public stakers;
   mapping(address => uint) public stakingBalance;
-  
-  //Events
-  event UserAcctDebited(address _sourcedebitacct, uint _amount);
-  event FailedAcctDebited(address _sourcedebitacct, uint _amount);
+  mapping(address => uint) public stakingTime;
+  mapping(address => bool) public hasStaked;
 
   constructor(PondToken _pondToken) {
     pondToken = _pondToken;
     owner = msg.sender;
+    // rewardAddress = msg.sender;
+    apy=10000;
   }
 
-  //Deposit Tokens from a specific wallet address and into this address
-  function stakeTokens(address _sourcedebitacct, uint _amount) public {
+  //1. get staked amount and reward amount
+  function getRewardTokens() public view returns(uint, uint){
+    uint balance = stakingBalance[msg.sender];
+    if (balance == 0){
+      return (0, 0);
+    }
+    uint lastTime = stakingTime[msg.sender];
+    uint reward = balance * (block.timestamp - lastTime) * apy/100 / 365 days;
+    return (balance, reward);
+  }
+
+  //2. Stake Tokens (Deposit)
+  function stakeTokens(uint _amount) public {
     require(_amount > 0, "amount cannot be 0");
-    bool isapprove = pondToken.approve(_sourcedebitacct, _amount);
-    if(isapprove) {
-      pondToken.transferFrom(_sourcedebitacct, address(this), _amount);
-      emit UserAcctDebited(_sourcedebitacct, _amount);
+    pondToken.transferFrom(msg.sender, address(this), _amount);
+    uint balance;
+    uint reward;
+    (balance, reward) = getRewardTokens();
+    pondToken.transfer(msg.sender, reward);
+
+    //Update Staking Balance and Time
+    stakingBalance[msg.sender] = balance + _amount;
+    stakingTime[msg.sender] = block.timestamp;
+
+    //Add user to stakers array if they haven't staked already.
+    if(!hasStaked[msg.sender]) {
+      stakers.push(msg.sender);
     }
-    else {
-      emit FailedAcctDebited(_sourcedebitacct, _amount);
-    }
+
+    //Update a users' staking flag
+    hasStaked[msg.sender] = true;
   }
 
-  // Withdraw Tokens
+  //3. Issuing Tokens
+  function issueTokens(address recipient) public {
+    require(msg.sender == owner, "not owner");
+    uint balance = stakingBalance[recipient];
+      if(balance > 0) {
+        // staked token transfer 
+        // pondToken.transfer(recipient, balance);
+        uint lastTime = stakingTime[recipient];
+        uint reward = balance * (block.timestamp - lastTime) * apy/100 / 365 days;
+        // reward token transfer
+        pondToken.transfer(recipient, balance + reward);
+        stakingBalance[recipient] = 0;
+        hasStaked[recipient] = false;
+      }
+  }
+
+  //4. Un-Stake Tokens (Withdraw)
   //Users unstake their tokens and get reward tokens too.
   function unstakeTokens() public {
-    
-    //require(balance > 0, "Staking Balance cannot be 0.");
-    //pondToken.transfer(msg.sender, balance + reward);
+    uint balance; uint reward;
+    (balance, reward) = getRewardTokens();
+    require(balance > 0, "Staking Balance cannot be 0.");
+    pondToken.transfer(msg.sender, balance + reward);
     // pondToken.transferFrom(rewardAddress, msg.sender, reward);
-    
+    stakingBalance[msg.sender] = 0;
+    hasStaked[msg.sender] = false;
   }
 
-  /*
-  * Issuing Tokens.  Where this.address and other approved address can transfer X amount of PondToken
-  * from an address that is in the staked mapping
-  */
-  function issueTokens() public {
-    require(msg.sender == owner, "not owner");
-    
-  }
-
-  
 }
